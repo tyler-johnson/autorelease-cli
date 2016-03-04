@@ -45,7 +45,7 @@ export default async function(ctx) {
 			let {user,token} = await prompt([{
 				type: "input",
 				name: "user",
-				message: "What is the username of Gemfury account this package will be published to?"
+				message: "What is the username of the Gemfury account that owns this package?"
 			},{
 				type: "input",
 				name: "token",
