@@ -1,11 +1,8 @@
 import prompt from "../utils/prompt";
 import addStep from "../utils/add-step";
-import _request from "request";
-import promisify from "es6-promisify";
+import request from "../utils/request";
 import parseGithubUrl from "parse-github-url";
 import {randomBytes} from "crypto";
-
-const request = promisify(_request);
 
 async function fetchOTP() {
 	return (await prompt([{
@@ -48,7 +45,7 @@ async function authorize(auth, note, otp, retry) {
 	throw new Error("Could not login to GitHub.");
 }
 
-export default async function(repourl, ctx) {
+export default async function(ctx) {
 	let auth = await prompt([{
 		type: "input",
 		name: "username",
@@ -65,7 +62,7 @@ export default async function(repourl, ctx) {
 		// }
 	}]);
 
-	let {owner,name} = parseGithubUrl(repourl);
+	let {owner,name} = parseGithubUrl(ctx.repository.url);
 	let token = await authorize(auth, `autorelease-${owner}-${name}-${randomBytes(4).toString("hex")}`);
 
 	ctx.env.GH_TOKEN = token;

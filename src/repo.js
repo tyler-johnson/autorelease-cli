@@ -1,38 +1,62 @@
 import prompt from "./utils/prompt";
 import {parse} from "url";
 import github from "./repos/github";
+import gitlab from "./repos/gitlab";
 
 export default async function(ctx, pkg) {
-	let repourl = pkg.repository && pkg.repository.url;
+	let repourl;
 
-	if (!repourl) repourl = (await prompt([{
-		type: "input",
-		name: "url",
-		message: "What is the git repository URL?"
-	}])).url;
+	if (pkg.repository && pkg.repository.url) {
+		repourl = pkg.repository && pkg.repository.url;
+		console.warn("Using repository URL found in package.json: %s", repourl);
+	} else {
+		repourl = (await prompt([{
+			type: "input",
+			name: "url",
+			message: "What is the git repository URL?"
+		}])).url;
+	}
 
 	let {host} = parse(repourl);
+	let type;
 
 	switch (host) {
 		case "github.com":
-			await github(repourl, ctx, pkg);
+			type = "github";
+			console.warn("Assuming host type '%s' based on repo URL.", type);
 			break;
 
 		case "gitlab.com":
-
+			type = "gitlab";
+			console.warn("Assuming host type '%s' based on repo URL.", type);
 			break;
 
 		default:
-			throw new Error(`Sorry, autorelease does not support the git host '${host}'. Please contribute a plugin to add support!`);
+			type = (await prompt([{
+				type: "list",
+				name: "type",
+				message: "Which of Git host are you using?",
+				choices: [
+					{ name: "Github", value: "github" },
+					{ name: "Gitlab", value: "gitlab" },
+					{ name: "Other", value: "other" }
+				]
+			}])).type;
+			break;
 	}
 
-	// let {type} =
+	ctx.repository = {
+		url: repourl,
+		type
+	};
 
-	// switch(type) {
-	// 	case "github":
-	// 		break;
-	//
-	// 	case "gitlab":
-	// 		break;
-	// }
+	switch (type) {
+		case "github":
+			await github(ctx, pkg);
+			break;
+
+		case "gitlab":
+			await gitlab(ctx, pkg);
+			break;
+	}
 }
