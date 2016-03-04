@@ -11,8 +11,9 @@ export default async function(ctx) {
 		name: "type",
 		message: "What type of NPM registry are you using?",
 		choices: [
-			{ name: "Standard NPM", value: "npm" },
-			{ name: "Gemfury", value: "gemfury" }
+			{ name: "Standard NPM (npmjs.org, Sinopia, etc.)", value: "npm" },
+			{ name: "Gemfury", value: "gemfury" },
+			{ name: "Other (do nothing)", value: "other" }
 		],
 		default: "npm"
 	}]);
