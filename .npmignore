@@ -1,0 +1,5 @@
+.*
+Makefile
+rollup.config.js
+src/
+test/
