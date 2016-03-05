@@ -23,7 +23,14 @@ async function authorize(auth, note, otp, retry) {
 			"X-GitHub-OTP": otp
 		},
 		body: {
-			scopes: [ "repo" ],
+			scopes: [
+				"repo",
+				"read:org",
+				"user:email",
+				"repo_deployment",
+				"repo:status",
+				"write:repo_hook"
+			],
 			note: note
 		}
 	});

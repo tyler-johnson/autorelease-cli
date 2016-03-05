@@ -23,6 +23,7 @@ if (argv.version) {
 
 import registry from "./registry";
 import repo from "./repo";
+import ci from "./ci";
 
 (async function() {
 	try {
@@ -36,6 +37,7 @@ import repo from "./repo";
 		let pkg = JSON.parse(await fs.readFile("./package.json", "utf-8"));
 		await registry(ctx, pkg);
 		await repo(ctx, pkg);
+		await ci(ctx, pkg);
 		console.log(ctx);
 	} catch(e) {
 		console.error(e.stack || e);
