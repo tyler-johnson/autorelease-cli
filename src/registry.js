@@ -2,6 +2,7 @@ import promisify from "es6-promisify";
 import _getNpmToken from "get-npm-token";
 import addStep from "./utils/add-step";
 import prompt from "./utils/prompt";
+import npm from "global-npm";
 
 const getNpmToken = promisify(_getNpmToken);
 
@@ -23,15 +24,18 @@ export default async function(ctx) {
 			let {registry,username,email,password} = await prompt([{
 				type: "input",
 				name: "registry",
-				message: "What is the NPM registry URL?"
+				message: "What is the NPM registry URL?",
+				default: npm.config.get("registry")
 			},{
 				type: "input",
 				name: "username",
-				message: "What is your NPM username?"
+				message: "What is your NPM username?",
+				default: npm.config.get("username")
 			},{
 				type: "input",
 				name: "email",
-				message: "What is your NPM email?"
+				message: "What is your NPM email?",
+				default: npm.config.get("email")
 			},{
 				type: "password",
 				name: "password",

@@ -1,5 +1,7 @@
 import minimist from "minimist";
 import fs from "fs-promise";
+import promisify from "es6-promisify";
+import npm from "global-npm";
 
 let argv = minimist(process.argv.slice(2), {
 	string: [ ],
@@ -27,6 +29,8 @@ import ci from "./ci";
 
 (async function() {
 	try {
+		await promisify(npm.load.bind(npm))({});
+
 		let ctx = {
 			env: {}, // environment vars
 			options: {}, // autorelease options
