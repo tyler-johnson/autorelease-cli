@@ -1,7 +1,6 @@
 import prompt from "../utils/prompt";
 import addStep from "../utils/add-step";
 import request from "../utils/request";
-import parseGithubUrl from "parse-github-url";
 import {randomBytes} from "crypto";
 
 async function fetchOTP() {
@@ -27,8 +26,6 @@ async function authorize(auth, note, otp, retry) {
 				"repo",
 				"read:org",
 				"user:email",
-				"repo_deployment",
-				"repo:status",
 				"write:repo_hook"
 			],
 			note: note
@@ -69,7 +66,7 @@ export default async function(ctx) {
 		// }
 	}]);
 
-	let {owner,name} = parseGithubUrl(ctx.repository.url);
+	let {owner,name} = ctx.repository;
 	let token = await authorize(auth, `autorelease-${owner}-${name}-${randomBytes(4).toString("hex")}`);
 
 	ctx.env.GH_TOKEN = token;

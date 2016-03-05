@@ -1,7 +1,7 @@
 import prompt from "./utils/prompt";
-import {parse} from "url";
 import github from "./repos/github";
 import gitlab from "./repos/gitlab";
+import parseGitUrl from "git-url-parse";
 
 export default async function(ctx, pkg) {
 	let repourl;
@@ -17,10 +17,10 @@ export default async function(ctx, pkg) {
 		}])).url;
 	}
 
-	let {host} = parse(repourl);
+	let giturl = parseGitUrl(repourl);
 	let type;
 
-	switch (host) {
+	switch (giturl.resource) {
 		case "github.com":
 			type = "github";
 			console.warn("Assuming host type '%s' based on repo URL.", type);
@@ -46,7 +46,7 @@ export default async function(ctx, pkg) {
 	}
 
 	ctx.repository = {
-		url: repourl,
+		...giturl,
 		type
 	};
 

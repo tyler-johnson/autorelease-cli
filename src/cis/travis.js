@@ -1,9 +1,9 @@
 import Travis from "travis-ci";
 import promisify from "es6-promisify";
-import parseGithubUrl from "parse-github-url";
 import {map,find,includes} from "lodash";
 import {stat,writeFile,readFile} from "fs-promise";
 import yaml from "js-yaml";
+import prompt from "../utils/prompt";
 
 const {pkgname,pkgver} = require("./package.json");
 
@@ -57,13 +57,13 @@ async function saveEnvVar(travis, repoid, vars, name, value) {
 	let id = evar ? evar.id : null;
 
 	await P(travis.agent, "request")(
-			id ? "PATCH" : "POST",
-			`/settings/env_vars${id ? '/' + id : ''}?repository_id=${repoid}`,
-			{
-					env_var: {
-							name, value, public: false
-					}
+		id ? "PATCH" : "POST",
+		`/settings/env_vars${id ? '/' + id : ''}?repository_id=${repoid}`,
+		{
+			env_var: {
+				name, value, public: false
 			}
+		}
 	);
 }
 
@@ -85,7 +85,7 @@ export default async function(ctx, pkg, pro) {
 	await syncUser(travis);
 
 	// fetch repo in question
-	let {owner,name} = parseGithubUrl(ctx.repository.url);
+	let {owner,name} = ctx.repository;
 	let {repo} = await P(travis.repos(owner, name), "get")();
 
 	// ensure that git hooks are enabled on this repo
@@ -127,12 +127,11 @@ export default async function(ctx, pkg, pro) {
 	// otherwise, add the autorelease script to after_success
 	else {
 		let tyml = yaml.safeLoad(await readFile(".travis.yml", "utf-8"));
-
 		if (!tyml.after_success) tyml.after_success = [];
 		if (!includes(tyml.after_success, "npm run autorelease")) {
 			tyml.after_success.push("npm run autorelease");
+			await writeFile(".travis.yml", yaml.safeDump(tyml));
+			console.warn("Travis after_success script added to .travis.yml: 'npm run autorelease'");
 		}
-
-		await writeFile(".travis.yml", yaml.safeDump(tyml));
 	}
 }

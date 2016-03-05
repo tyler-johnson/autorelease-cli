@@ -1,12 +1,11 @@
 import prompt from "../utils/prompt";
 import request from "../utils/request";
 import addStep from "../utils/add-step";
-import {parse,format} from "url";
-import {pick} from "lodash";
 
 export default async function(ctx) {
-	let url = format(pick(parse(ctx.repository.url), "host", "protocol"));
-	if (!url) {
+	let url;
+
+	if (ctx.repository.resource !== "gitlab.com") {
 		url = (await prompt([{
 			type: "input",
 			name: "url",
@@ -14,6 +13,7 @@ export default async function(ctx) {
 			default: url
 		}])).url;
 	} else {
+		url = "https://gitlab.com";
 		console.warn("Assuming GitLab.com is being used based on repo URL.");
 	}
 
