@@ -4,6 +4,7 @@ import {map,find,includes} from "lodash";
 import {stat,writeFile,readFile} from "fs-promise";
 import yaml from "js-yaml";
 import prompt from "../utils/prompt";
+import addStep from "../utils/add-step";
 
 const {pkgname,pkgver} = require("./package.json");
 
@@ -134,4 +135,8 @@ export default async function(ctx, pkg, pro) {
 			console.warn("Travis after_success script added to .travis.yml: 'npm run autorelease'");
 		}
 	}
+
+	// install travis autorelease stuff
+	ctx.install.push("autorelease-travis");
+	addStep(ctx, "pre", "verify", "autorelease-travis/verify");
 }
