@@ -51,6 +51,6 @@ export default async function(ctx) {
 	ctx.env.GL_TOKEN = body.access_token;
 	ctx.env.GL_URL = url;
 	ctx.install.push("autorelease-gitlab");
-	addStep(ctx, "pre", "verify", "autorelease-gitlab/verify");
+	addStep(ctx, "pre", "verify", "autorelease-gitlab/verify-token");
 	addStep(ctx, "post", "publishChangelog", "autorelease-gitlab/create-release");
 }

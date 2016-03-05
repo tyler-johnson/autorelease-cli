@@ -21,6 +21,7 @@
     "js-yaml": "^3.5.3",
     "lodash": "^4.6.1",
     "minimist": "^1.2.0",
+    "node-gitlab": "^1.2.1",
     "request": "^2.69.0",
     "travis-ci": "^2.1.0"
   },

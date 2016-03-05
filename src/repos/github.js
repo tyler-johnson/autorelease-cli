@@ -40,7 +40,7 @@ async function authorize(auth, note, otp, retry) {
 		if (retry) {
 			console.warn("Invalid two-factor authentication code.");
 		} else {
-			console.info(`Two-factor authentication code needed via ${type}.`);
+			console.warn(`Two-factor authentication code needed via ${type}.`);
 		}
 
 		return await authorize(auth, note, await fetchOTP(), true);

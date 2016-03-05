@@ -1,6 +1,7 @@
 import prompt from "./utils/prompt";
 import {forEach} from "lodash";
 import travis from "./cis/travis";
+import gitlab from "./cis/gitlab";
 
 export default async function(ctx, pkg) {
 	let def = null;
@@ -38,7 +39,7 @@ export default async function(ctx, pkg) {
 			break;
 
 		case "gitlab":
-
+			await gitlab(ctx, pkg);
 			break;
 
 		case "other":
