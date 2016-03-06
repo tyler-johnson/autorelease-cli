@@ -16,11 +16,14 @@
     "es6-promisify": "^3.0.0",
     "fs-promise": "^0.5.0",
     "get-npm-token": "^1.0.1",
+    "git-url-parse": "^6.0.1",
     "inquirer": "^0.12.0",
+    "js-yaml": "^3.5.3",
     "lodash": "^4.6.1",
     "minimist": "^1.2.0",
-    "parse-github-url": "^0.3.0",
-    "request": "^2.69.0"
+    "node-gitlab": "^1.2.1",
+    "request": "^2.69.0",
+    "travis-ci": "^2.1.0"
   },
   "devDependencies": {
     "autorelease": "^1.5.0",
@@ -32,7 +35,7 @@
     "babel-plugin-transform-es2015-destructuring": "^6.6.4",
     "babel-plugin-transform-es2015-parameters": "^6.6.4",
     "babel-plugin-transform-object-rest-spread": "^6.6.4",
-    "eslint": "^2.2.0",
+    "eslint": "~2.2.0",
     "rollup": "^0.25.4",
     "rollup-plugin-babel": "^2.4.0",
     "tape": "^4.5.0"

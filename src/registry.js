@@ -2,6 +2,7 @@ import promisify from "es6-promisify";
 import _getNpmToken from "get-npm-token";
 import addStep from "./utils/add-step";
 import prompt from "./utils/prompt";
+import npm from "global-npm";
 
 const getNpmToken = promisify(_getNpmToken);
 
@@ -11,8 +12,9 @@ export default async function(ctx) {
 		name: "type",
 		message: "What type of NPM registry are you using?",
 		choices: [
-			{ name: "Standard NPM", value: "npm" },
-			{ name: "Gemfury", value: "gemfury" }
+			{ name: "Standard NPM (npmjs.org, Sinopia, etc.)", value: "npm" },
+			{ name: "Gemfury", value: "gemfury" },
+			{ name: "Other (do nothing)", value: "other" }
 		],
 		default: "npm"
 	}]);
@@ -22,15 +24,18 @@ export default async function(ctx) {
 			let {registry,username,email,password} = await prompt([{
 				type: "input",
 				name: "registry",
-				message: "What is the NPM registry URL?"
+				message: "What is the NPM registry URL?",
+				default: npm.config.get("registry")
 			},{
 				type: "input",
 				name: "username",
-				message: "What is your NPM username?"
+				message: "What is your NPM username?",
+				default: npm.config.get("username")
 			},{
 				type: "input",
 				name: "email",
-				message: "What is your NPM email?"
+				message: "What is your NPM email?",
+				default: npm.config.get("email")
 			},{
 				type: "password",
 				name: "password",
@@ -38,6 +43,7 @@ export default async function(ctx) {
 			}]);
 
 			ctx.env.NPM_TOKEN = await getNpmToken(registry, username, email, password);
+			ctx.publish = "npm publish";
 			break;
 		}
 
@@ -45,7 +51,7 @@ export default async function(ctx) {
 			let {user,token} = await prompt([{
 				type: "input",
 				name: "user",
-				message: "What is the username of Gemfury account this package will be published to?"
+				message: "What is the username of the Gemfury account that owns this package?"
 			},{
 				type: "input",
 				name: "token",

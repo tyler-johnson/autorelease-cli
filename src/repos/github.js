@@ -1,11 +1,7 @@
 import prompt from "../utils/prompt";
 import addStep from "../utils/add-step";
-import _request from "request";
-import promisify from "es6-promisify";
-import parseGithubUrl from "parse-github-url";
+import request from "../utils/request";
 import {randomBytes} from "crypto";
-
-const request = promisify(_request);
 
 async function fetchOTP() {
 	return (await prompt([{
@@ -26,7 +22,12 @@ async function authorize(auth, note, otp, retry) {
 			"X-GitHub-OTP": otp
 		},
 		body: {
-			scopes: [ "repo" ],
+			scopes: [
+				"repo",
+				"read:org",
+				"user:email",
+				"write:repo_hook"
+			],
 			note: note
 		}
 	});
@@ -39,7 +40,7 @@ async function authorize(auth, note, otp, retry) {
 		if (retry) {
 			console.warn("Invalid two-factor authentication code.");
 		} else {
-			console.info(`Two-factor authentication code needed via ${type}.`);
+			console.warn(`Two-factor authentication code needed via ${type}.`);
 		}
 
 		return await authorize(auth, note, await fetchOTP(), true);
@@ -48,7 +49,7 @@ async function authorize(auth, note, otp, retry) {
 	throw new Error("Could not login to GitHub.");
 }
 
-export default async function(repourl, ctx) {
+export default async function(ctx) {
 	let auth = await prompt([{
 		type: "input",
 		name: "username",
@@ -65,7 +66,7 @@ export default async function(repourl, ctx) {
 		// }
 	}]);
 
-	let {owner,name} = parseGithubUrl(repourl);
+	let {owner,name} = ctx.repository;
 	let token = await authorize(auth, `autorelease-${owner}-${name}-${randomBytes(4).toString("hex")}`);
 
 	ctx.env.GH_TOKEN = token;

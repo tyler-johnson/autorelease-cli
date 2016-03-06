@@ -1,5 +1,7 @@
 import minimist from "minimist";
-import fs from "fs-promise";
+import promisify from "es6-promisify";
+import npm from "global-npm";
+import {readJSON} from "./utils/json";
 
 let argv = minimist(process.argv.slice(2), {
 	string: [ ],
@@ -23,20 +25,25 @@ if (argv.version) {
 
 import registry from "./registry";
 import repo from "./repo";
+import ci from "./ci";
+import final from "./final";
 
 (async function() {
 	try {
+		await promisify(npm.load.bind(npm))({});
+
 		let ctx = {
 			env: {}, // environment vars
 			options: {}, // autorelease options
 			install: [], // extra packages to install
-			publish: "npm publish" // command to release
+			publish: null, // command to release
+			package: await readJSON("./package.json") // the local packagejson
 		};
 
-		let pkg = JSON.parse(await fs.readFile("./package.json", "utf-8"));
-		await registry(ctx, pkg);
-		await repo(ctx, pkg);
-		console.log(ctx);
+		await registry(ctx);
+		await repo(ctx);
+		await ci(ctx);
+		await final(ctx);
 	} catch(e) {
 		console.error(e.stack || e);
 		process.exit(1);
