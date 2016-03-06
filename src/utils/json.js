@@ -4,7 +4,7 @@ export async function readJSON(p, allowMissing) {
 	try {
 		return JSON.parse(await readFile(p, "utf-8"));
 	} catch (e) {
-		if (allowMissing && e.code === "ENOENT") throw e;
+		if (!allowMissing || e.code !== "ENOENT") throw e;
 	}
 }
 
