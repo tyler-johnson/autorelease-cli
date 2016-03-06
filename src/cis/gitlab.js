@@ -2,7 +2,7 @@ import Gitlab from "node-gitlab";
 import gitlabPromisify from "node-gitlab/lib/promisify";
 import {parse,format} from "url";
 import {join} from "path";
-import {map} from "lodash";
+import {map,size} from "lodash";
 import addStep from "../utils/add-step";
 
 async function fetchEnvVars(gitlab, id) {
@@ -53,8 +53,13 @@ export default async function(ctx) {
 	await Promise.all(map(ctx.env, async (val, name) => {
 		await saveEnvVar(gitlab, project.id, envvars, name, val);
 	}));
+	console.warn(`Save ${size(ctx.env)} environement variables to GitLab CI.`);
 
 	// install gitlab ci autorelease stuff
 	ctx.install.push("autorelease-gitlab");
 	addStep(ctx, "pre", "verify", "autorelease-gitlab/verify-ci");
+
+	// unlike with travis we can't easily add the script to CI config
+	console.warn(`GitLab CI was successfully setup for this repo.
+You'll need to add 'npm run autorelease' to a job in your .gitlab.yml file.`);
 }

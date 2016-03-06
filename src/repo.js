@@ -3,7 +3,8 @@ import github from "./repos/github";
 import gitlab from "./repos/gitlab";
 import parseGitUrl from "git-url-parse";
 
-export default async function(ctx, pkg) {
+export default async function(ctx) {
+	let {package:pkg} = ctx;
 	let repourl;
 
 	if (pkg.repository && pkg.repository.url) {
@@ -22,13 +23,23 @@ export default async function(ctx, pkg) {
 
 	switch (giturl.resource) {
 		case "github.com":
-			type = "github";
-			console.warn("Assuming host type '%s' based on repo URL.", type);
+			type = (await prompt([{
+				type: "confirm",
+				name: "type",
+				message: "Do you want to use Travis CI and/or publish changelogs to GitHub?",
+				default: true
+			}])).type ? "github" : "other";
+			// console.warn("Assuming host type '%s' based on repo URL.", type);
 			break;
 
 		case "gitlab.com":
-			type = "gitlab";
-			console.warn("Assuming host type '%s' based on repo URL.", type);
+			type = (await prompt([{
+				type: "confirm",
+				name: "type",
+				message: "Do you want to use GitLab CI and/or publish changelogs to GitLab?",
+				default: true
+			}])).type ? "gitlab" : "other";
+			// console.warn("Assuming host type '%s' based on repo URL.", type);
 			break;
 
 		default:
@@ -52,11 +63,11 @@ export default async function(ctx, pkg) {
 
 	switch (type) {
 		case "github":
-			await github(ctx, pkg);
+			await github(ctx);
 			break;
 
 		case "gitlab":
-			await gitlab(ctx, pkg);
+			await gitlab(ctx);
 			break;
 	}
 }

@@ -1,25 +1,22 @@
 import prompt from "./utils/prompt";
-import {forEach} from "lodash";
+import {forEach,size} from "lodash";
 import travis from "./cis/travis";
 import gitlab from "./cis/gitlab";
 
-export default async function(ctx, pkg) {
+export default async function(ctx) {
 	let def = null;
+	let {type:rtype} = ctx.repository;
 	let choices = [
-		{ name: "Other/None (print env vars)", value: "other" }
+		{ name: "Other/None", value: "other" }
 	];
 
-	switch (ctx.repository.type) {
-		case "github":
-			choices.unshift({ name: "Travis CI Pro", value: "travis-pro" });
-			choices.unshift({ name: "Travis CI", value: "travis" });
-			def = "travis";
-			break;
-
-		case "gitlab":
-			choices.unshift({ name: "Gitlab CI", value: "gitlab" });
-			def = "gitlab";
-			break;
+	if (rtype === "github") {
+		choices.unshift({ name: "Travis CI Pro", value: "travis-pro" });
+		choices.unshift({ name: "Travis CI", value: "travis" });
+		def = "travis";
+	} else if (rtype === "gitlab") {
+		choices.unshift({ name: "Gitlab CI", value: "gitlab" });
+		def = "gitlab";
 	}
 
 	let type;
@@ -35,17 +32,23 @@ export default async function(ctx, pkg) {
 	switch (type) {
 		case "travis":
 		case "travis-pro":
-			await travis(ctx, pkg, type === "travis-pro");
+			await travis(ctx, type === "travis-pro");
 			break;
 
 		case "gitlab":
-			await gitlab(ctx, pkg);
+			await gitlab(ctx);
 			break;
 
 		case "other":
-			forEach(ctx.env, (val, key) => {
-				console.log("%s=%s", key, val);
-			});
+			if (size(ctx.env)) {
+				console.warn("These are some environment variables that need to be set for autorelease to work:\n");
+				forEach(ctx.env, (val, key) => {
+					console.log("  %s=%s", key, val);
+				});
+				console.warn();
+			} else {
+				console.warn("No environment variables to print.");
+			}
 			break;
 	}
 }

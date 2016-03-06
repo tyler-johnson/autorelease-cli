@@ -43,6 +43,7 @@ export default async function(ctx) {
 			}]);
 
 			ctx.env.NPM_TOKEN = await getNpmToken(registry, username, email, password);
+			ctx.publish = "npm publish";
 			break;
 		}
 

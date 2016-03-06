@@ -1,6 +1,6 @@
 import Travis from "travis-ci";
 import promisify from "es6-promisify";
-import {map,find,includes} from "lodash";
+import {map,find,includes,size} from "lodash";
 import {stat,writeFile,readFile} from "fs-promise";
 import yaml from "js-yaml";
 import prompt from "../utils/prompt";
@@ -68,7 +68,7 @@ async function saveEnvVar(travis, repoid, vars, name, value) {
 	);
 }
 
-export default async function(ctx, pkg, pro) {
+export default async function(ctx, pro) {
 	let travis = new Travis({
 		version: "2.0.0",
 		pro,
@@ -100,6 +100,7 @@ export default async function(ctx, pkg, pro) {
 	await Promise.all(map(ctx.env, async (val, name) => {
 		await saveEnvVar(travis, repo.id, envvars, name, val);
 	}));
+	console.warn(`Save ${size(ctx.env)} environement variables to Travis CI.`);
 
 	// check if a travis file exists
 	let hasTravisFile;
