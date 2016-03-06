@@ -21,12 +21,22 @@ export default async function(ctx) {
 
 	switch (type) {
 		case "npm": {
-			let {registry,username,email,password} = await prompt([{
+			let defReg = (ctx.package.publishConfig &&
+				ctx.package.publishConfig.registry) ||
+				npm.config.get("registry");
+
+			let {registry} = await prompt([{
 				type: "input",
 				name: "registry",
 				message: "What is the NPM registry URL?",
-				default: npm.config.get("registry")
-			},{
+				default: defReg
+			}]);
+
+			if (registry !== defReg) {
+				ctx.publishConfig.registry = registry;
+			}
+
+			let {username,email,password} = await prompt([{
 				type: "input",
 				name: "username",
 				message: "What is your NPM username?",
