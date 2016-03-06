@@ -1,5 +1,5 @@
 import {readJSON,writeJSON} from "./utils/json";
-import {merge,omit,forEach,isEqual,size} from "lodash";
+import {cloneDeep,merge,omit,forEach,isEqual,size,uniq} from "lodash";
 import prompt from "./utils/prompt";
 import {spawn} from "child_process";
 
@@ -9,7 +9,7 @@ function mergeSteps(cur, next) {
 	}
 
 	if (next) forEach(next, (v, k) => {
-		cur[k] = [].concat(cur[k], v).filter(Boolean);
+		cur[k] = uniq([].concat(cur[k], v).filter(Boolean));
 	});
 
 	return cur;
@@ -44,21 +44,28 @@ async function resolveConflict(actual, desired, message) {
 	return result;
 }
 
-export default async function({options,publish,install}) {
-	// write new autorelease script, careful not to overwrite existing content
-	let pkg = await readJSON("package.json");
-	if (!pkg.scripts) pkg.scripts = {};
+export default async function({options,publish,install,publishConfig}) {
+	let opkg = await readJSON("package.json");
+	let pkg = cloneDeep(opkg);
 
+	// no need for a version anymore
+	delete pkg.version;
+
+	// merge publish config
+	pkg.publishConfig = merge(pkg.publishConfig, publishConfig);
+
+	// write autorelease script, careful when overwriting existing content
+	if (!pkg.scripts) pkg.scripts = {};
 	let arscript = `autorelease pre && ${publish || "npm publish"} && autorelease post`;
-	let write = !pkg.scripts.autorelease;
-	if (publish && !write && arscript !== pkg.scripts.autorelease) {
+	let writeScript = !pkg.scripts.autorelease;
+	if (publish && !writeScript && arscript !== pkg.scripts.autorelease) {
 		console.warn("package.json has an autorelease script which conflicts with this one.");
-		write = await resolveConflict(pkg.scripts.autorelease, arscript, "Overwrite the existing autorelease script?");
+		writeScript = await resolveConflict(pkg.scripts.autorelease, arscript, "Overwrite the existing autorelease script?");
 	}
-	if (write) {
-		pkg.scripts.autorelease = arscript;
-		await writeJSON("package.json", pkg);
-	}
+	if (writeScript) pkg.scripts.autorelease = arscript;
+
+	// save the package.json
+	if (!isEqual(opkg, pkg)) await writeJSON("package.json", pkg);
 
 	// save options to autoreleaserc
 	let rc = await readJSON(".autoreleaserc", true) || {};

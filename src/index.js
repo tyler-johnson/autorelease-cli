@@ -36,6 +36,7 @@ import final from "./final";
 			env: {}, // environment vars
 			options: {}, // autorelease options
 			install: [], // extra packages to install
+			publishConfig: {}, // npm publish config
 			publish: null, // command to release
 			package: await readJSON("./package.json") // the local packagejson
 		};
