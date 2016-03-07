@@ -4,7 +4,7 @@ import {parse,format} from "url";
 import {join} from "path";
 import {map,size} from "lodash";
 import addStep from "../utils/add-step";
-import {stat,writeFile,readFile} from "fs-promise";
+import {stat,writeFile} from "fs-promise";
 import yaml from "js-yaml";
 
 async function fetchEnvVars(gitlab, id) {
