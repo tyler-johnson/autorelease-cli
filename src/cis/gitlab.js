@@ -4,6 +4,8 @@ import {parse,format} from "url";
 import {join} from "path";
 import {map,size} from "lodash";
 import addStep from "../utils/add-step";
+import {stat,writeFile,readFile} from "fs-promise";
+import yaml from "js-yaml";
 
 async function fetchEnvVars(gitlab, id) {
 	return await gitlab.request("GET", "/projects/:id/variables", { id });
@@ -18,6 +20,24 @@ async function saveEnvVar(gitlab, pid, vars, key, value) {
 		{ pid, key, value }
 	);
 }
+
+const gitlabyml = {
+	image: "node:latest",
+	stages: ["release"],
+	before_script: [
+		"npm config set loglevel warn",
+		"npm upgrade && npm prune && npm rebuild"
+	],
+	release_job: {
+		stage: "release",
+		allow_failure: true,
+		script: ["npm run autorelease"],
+		only: ["master"],
+		cache: {
+			paths: ["node_modules/"]
+		}
+	}
+};
 
 export default async function(ctx) {
 	// get api url
@@ -59,7 +79,32 @@ export default async function(ctx) {
 	ctx.install.push("autorelease-gitlab");
 	addStep(ctx, "pre", "verify", "autorelease-gitlab/verify-ci");
 
+	// check if a travis file exists
+	let hasGitlabFile;
+	try {
+		await stat(".gitlab-ci.yml");
+		hasGitlabFile = true;
+	} catch(e) {
+		if (e.code !== "ENOENT") throw e;
+		hasGitlabFile = false;
+	}
+
+	// create a .gitlab-ci.yml file if it does not exist
+	if (!hasGitlabFile) {
+		let {addFile} = await prompt([{
+			type: "confirm",
+			name: "addFile",
+			message: "No .gitlab-ci.yml file found. Should I create one?",
+			default: true
+		}]);
+
+		if (addFile) {
+			await writeFile(".gitlab-ci.yml", yaml.safeDump(gitlabyml));
+		}
+	}
+
 	// unlike with travis we can't easily add the script to CI config
-	console.warn(`GitLab CI was successfully setup for this repo.
-You'll need to add 'npm run autorelease' to a job in your .gitlab.yml file.`);
+	else {
+		console.warn(`Note: You'll need to add 'npm run autorelease' to a job in your .gitlab-ci.yml file.`);
+	}
 }
