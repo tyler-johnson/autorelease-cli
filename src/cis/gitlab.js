@@ -25,10 +25,7 @@ async function saveEnvVar(gitlab, pid, vars, key, value) {
 const gitlabyml = {
 	image: "node:latest",
 	stages: ["release"],
-	before_script: [
-		"npm config set loglevel warn",
-		"npm upgrade && npm prune && npm rebuild"
-	],
+	before_script: ["npm install"],
 	release_job: {
 		stage: "release",
 		allow_failure: true,
