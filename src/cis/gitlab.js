@@ -43,7 +43,7 @@ export default async function(ctx) {
 	});
 
 	// ensure that builds are enabled for the project
-	if (!project.builds_enabled) await gitlab.projects.put({
+	if (!project.builds_enabled) await gitlab.projects.update({
 		id: project.id,
 		builds_enabled: true
 	});
