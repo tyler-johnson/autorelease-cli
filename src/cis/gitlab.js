@@ -6,6 +6,7 @@ import {map,size} from "lodash";
 import addStep from "../utils/add-step";
 import {stat,writeFile} from "fs-promise";
 import yaml from "js-yaml";
+import prompt from "../utils/prompt";
 
 async function fetchEnvVars(gitlab, id) {
 	return await gitlab.request("GET", "/projects/:id/variables", { id });
