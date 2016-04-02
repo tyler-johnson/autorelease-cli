@@ -1,5 +1,5 @@
 import {readJSON,writeJSON} from "./utils/json";
-import {cloneDeep,merge,omit,forEach,isEqual,size,uniq} from "lodash";
+import {cloneDeep,merge,omit,forEach,isEqual,size,uniq,reduce} from "lodash";
 import prompt from "./utils/prompt";
 import {spawn} from "child_process";
 
@@ -52,7 +52,9 @@ export default async function({options,publish,install,publishConfig}) {
 	delete pkg.version;
 
 	// merge publish config
-	pkg.publishConfig = merge(pkg.publishConfig, publishConfig);
+	if (size(publishConfig)) {
+		pkg.publishConfig = merge(pkg.publishConfig, publishConfig);
+	}
 
 	// write autorelease script, careful when overwriting existing content
 	if (!pkg.scripts) pkg.scripts = {};
@@ -72,7 +74,11 @@ export default async function({options,publish,install,publishConfig}) {
 	let config = merge({}, rc, omit(options, "pre", "post"));
 	config.pre = mergeSteps(config.pre, options.pre);
 	config.post = mergeSteps(config.post, options.post);
-	if (size(config) && !isEqual(rc, config)) await writeJSON(".autoreleaserc", config);
+	config = reduce(config, (m, v, k) => {
+		if (typeof v !== "undefined") m[k] = v;
+		return m;
+	}, {});
+	if (size(config) || !isEqual(rc, config)) await writeJSON(".autoreleaserc", config);
 
 	// install npm modules
 	await new Promise((resolve, reject) => {
