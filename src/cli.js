@@ -22,7 +22,7 @@ if (argv.version) {
 	process.exit(0);
 }
 
-setup.catch(function(e) {
+setup().catch(function(e) {
 	console.error(e.stack || e);
 	process.exit(1);
 });

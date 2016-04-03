@@ -6,10 +6,12 @@
     "type": "git",
     "url": "https://github.com/tyler-johnson/autorelease-setup.git"
   },
-  "bin": "index.js",
+  "main": "index.js",
+  "bin": "cli.js",
   "scripts": {
     "lint": "eslint src/ test/",
     "build": "make clean && make",
+    "prepublish": "npm run build",
     "autorelease": "autorelease pre && npm publish && autorelease post"
   },
   "dependencies": {
